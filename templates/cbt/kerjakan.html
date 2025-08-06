@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block content_top %}
+<div class="container py-5">
+  <h3>Mengerjakan: {{ paket.nama }}</h3>
+
+  <form method="POST">
+    {% csrf_token %}
+    {% for soal in soal_list %}
+      <div class="mb-4">
+        <p><strong>{{ forloop.counter }}.</strong> {{ soal.teks }}</p>
+        <div class="ml-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="soal_{{ soal.id }}" value="A" required>
+            <label class="form-check-label">A. {{ soal.opsi_a }}</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="soal_{{ soal.id }}" value="B">
+            <label class="form-check-label">B. {{ soal.opsi_b }}</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="soal_{{ soal.id }}" value="C">
+            <label class="form-check-label">C. {{ soal.opsi_c }}</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="soal_{{ soal.id }}" value="D">
+            <label class="form-check-label">D. {{ soal.opsi_d }}</label>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-success">Kumpulkan Jawaban</button>
+  </form>
+</div>
+{% endblock %}
