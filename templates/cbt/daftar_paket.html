@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content_top %}
+
+<div class="container py-5">
+  <h3 class="mb-4">📚 Paket Soal Kamu</h3>
+
+  {% if paket_list %}
+    <div class="row">
+      {% for paket in paket_list %}
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">{{ paket.nama }}</h5>
+              <p class="card-text">{{ paket.deskripsi|default:"-"|truncatechars:100 }}</p>
+
+              <p class="card-text">
+                <strong>Jumlah Soal:</strong> {{ paket.jumlah_soal }}<br>
+                <strong>Durasi:</strong> {{ paket.durasi }} menit
+              
+
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">Belum ada paket soal yang tersedia. Silakan beli produk terlebih dahulu.</p>
+  {% endif %}
+</div>
+{% endblock %}

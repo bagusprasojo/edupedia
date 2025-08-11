@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% load static %}
+{% block content_top %}
+<div class="container py-5">
+  <h3>{{ produk.nama }}</h3>
+  <p class="text-muted">Paket soal yang tersedia di produk ini:</p>
+
+  {% if paket_list %}
+    <div class="row">
+        {% for paket in paket_list %}
+            <div class="card-body">
+                <h5 class="card-title">{{ paket.nama }}</h5>
+                <p class="card-text">{{ paket.deskripsi|default:"-"|truncatechars:100 }}</p>
+
+                {% with statistik=statistik_paket|get_item:paket.id %}
+                {% if statistik.jumlah > 0 %}
+                    <p class="text-success">✅ Dikerjakan {{ statistik.jumlah }} kali</p>
+                    <p>Rata-rata Nilai: <strong>{{ statistik.rata_rata }}</strong></p>
+                    <a href="{% url 'hasil_ujian' statistik.hasil_terakhir.uuid %}" class="btn btn-outline-primary btn-sm">Lihat Hasil Terakhir</a>
+                    <a href="{% url 'kerjakan_paket' paket.uuid %}" class="btn btn-primary btn-sm">📝 Kerjakan Lagi</a>
+                {% else %}
+                    <p class="text-danger">Belum pernah dikerjakan</p>
+                    <a href="{% url 'kerjakan_paket' paket.uuid %}" class="btn btn-primary btn-sm">Kerjakan Sekarang</a>
+                {% endif %}
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">Tidak ada paket soal dalam produk ini.</p>
+  {% endif %}
+</div>
+{% endblock %}

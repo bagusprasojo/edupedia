@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content_top %}
+<div class="container mt-4">
+
+<h3 id="produk" class="mt-5">🆕 Produk Terbaru</h3>
+<div class="row">
+  {% for produk in produk_terbaru %}
+    <div class="col">
+      <div class="card  rounded p-1">
+        {% if produk.gambar %}
+          <a href="{% url 'detail_produk' produk.uuid %}"><img src="{{ produk.gambar.url }}" class="card-img-top" style="height: 190px;  object-fit: cover;" alt="{{ produk.nama }}"></a>
+        {% else %}
+          <img src="{% static 'img/default-produk.jpg' %}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="No image">
+        {% endif %}
+        <div class="crad-body p-1">
+          <small class="text-muted"><a href="{% url 'detail_produk' produk.uuid %}">{{ produk.nama|truncatechars:40 }}</a></small>
+        </div>
+
+        <div class="crad-footer">
+          <div class="row">
+            <div class="col-7">            
+              <small class="text-muted">Rp{{ produk.harga|floatformat:0 }}</small>
+            </div>
+            <div class="col-5 text-right">
+              <small class="text-muted">
+                ⭐4.2
+              </small>            
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  {% empty %}
+    <p>Belum ada produk tersedia.</p>
+  {% endfor %}
+
+  
+</div>
+
+
+</div>
+{% endblock %}

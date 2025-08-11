@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content_top %}
+<div class="container py-5">
+  <h3>🛒 Keranjang Belanja</h3>
+  {% if item_keranjang %}
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Harga</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in item_keranjang %}
+        <tr>
+          <td>{{ item.produk.nama }}</td>
+          <td>Rp{{ item.produk.harga|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>Rp{{ total|floatformat:0 }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <a href="{% url 'checkout' %}" class="btn btn-success">Bayar Sekarang</a>
+  {% else %}
+    <p>Keranjang kamu kosong.</p>
+  {% endif %}
+</div>
+{% endblock %}

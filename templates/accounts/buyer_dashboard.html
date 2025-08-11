@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+
+{% load static %}
+
+{% block content_top %}
+
+<div class="container py-5">
+
+  <h3 class="mb-4">Halo, {{ user.first_name|default:user.username }} 👋</h3>
+
+  <div class="row">
+    <!-- Akses Produk -->
+    <div class="col-md-8">
+      <h5 class="mb-3">📚 Produk yang Kamu Miliki</h5>
+      {% if orders %}
+        <div class="list-group">
+          {% for order in orders %}
+            {% for item in order.items.all %}
+              <a href="{% url 'paket_per_produk' item.produk.uuid %}" class="list-group-item list-group-item-action">
+                {{ item.produk.nama }}<br>
+                <small class="text-muted">Dibeli pada {{ order.tanggal|date:"d M Y" }}</small>
+              </a>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Kamu belum membeli produk apapun.</p>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 p-3">
+        <h6>Total Order: <strong>{{ orders|length }}</strong></h6>
+        <h6>Total Produk Dibeli: 
+          <strong>
+            {{total_produk|default:0}}
+          </strong>
+        </h6>
+        <hr>
+        <a href="{% url 'keranjang' %}" class="btn btn-outline-primary btn-sm btn-block mb-2">🛒 Lihat Keranjang</a>
+        <a href="{% url 'logout' %}" class="btn btn-danger btn-sm btn-block">Logout</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+

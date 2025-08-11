@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% load static %}
+
+
+{% block content_top %}
+<div class="container py-5">
+  <h3>📄 Hasil Ujian: {{ hasil.paket.nama }}</h3>
+  <p>Tanggal dikerjakan: {{ hasil.waktu_selesai|date:"d M Y H:i" }}</p>
+  <h4 class="text-success">Nilai: {{ hasil.nilai|floatformat:2 }}</h4>
+
+  <hr class="my-4">
+
+  <h5>📝 Review Jawaban:</h5>
+
+  {% for j in jawaban_list %}
+    <div class="mb-4">
+      <p><strong>{{ forloop.counter }}.</strong> {{ j.soal.teks }}</p>
+
+      <ul class="list-group">
+        {% with opsi_list="A,B,C,D" %}
+            {% for kode in opsi_list|split:"," %}
+                {% if kode == "A" %}
+                    {% with opsi=j.soal.opsi_a %}{% endwith %}
+                {% elif kode == "B" %}
+                    {% with opsi=j.soal.opsi_b %}{% endwith %}
+                {% elif kode == "C" %}
+                    {% with opsi=j.soal.opsi_c %}{% endwith %}
+                {% elif kode == "D" %}
+                    {% with opsi=j.soal.opsi_d %}{% endwith %}
+                {% endif %}
+
+                <li class="list-group-item d-flex justify-content-between
+                {% if kode == j.jawaban_dipilih %}
+                    {% if j.benar %}
+                    list-group-item-success
+                    {% else %}
+                    list-group-item-danger
+                    {% endif %}
+                {% elif kode == j.soal.jawaban_benar %}
+                    list-group-item-info
+                {% endif %}
+                ">
+                {{ kode }}. {{ opsi }}
+                {% if kode == j.jawaban_dipilih %}
+                    {% if j.benar %}
+                    ✅
+                    {% else %}
+                    ❌
+                    {% endif %}
+                {% elif kode == j.soal.jawaban_benar %}
+                    ✔️ Kunci
+                {% endif %}
+                </li>
+
+                
+            {% endfor %}
+        {% endwith %}
+
+      </ul>
+
+      {% if j.soal.pembahasan %}
+        <div class="mt-2 p-3 bg-light border rounded">
+          <strong>Pembahasan:</strong><br>
+          {{ j.soal.pembahasan|linebreaks }}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
