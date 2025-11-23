@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from .forms import ProdukForm
-from .models import Produk, PaketSoal, Soal
+from .models import Produk, PaketSoal, Soal, Kategori
 import openpyxl
 from django.db import transaction
 

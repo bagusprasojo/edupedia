@@ -44,10 +44,28 @@ def checkout(request):
 
 
 def homepage_toko(request):
-    produk_terbaru = Produk.objects.order_by('-tanggal_dibuat')[:5]
-    kategori = Kategori.objects.filter(parent__isnull=True)
+    produk_terbaru = Produk.objects.order_by('-tanggal_dibuat')[:4]
+    produk_terbaru_ids = produk_terbaru.values_list('id', flat=True)
+    produk_list = Produk.objects.exclude(id__in=produk_terbaru_ids)
+
+    # produk_list = Produk.objects.all()
+    kategori = 'All Categories'
 
     return render(request, 'toko/homepage_toko.html', {
+        'nama_kategori': kategori,
+        'produk_list': produk_list,
         'produk_terbaru': produk_terbaru,
-        'kategori_list': kategori,
     })
+
+def produk_by_kategori(request, uuid):
+    kategori = get_object_or_404(Kategori, uuid=uuid)
+    produk_terbaru = Produk.objects.filter(kategori=kategori).order_by('-tanggal_dibuat')[:4]
+    produk_terbaru_ids = produk_terbaru.values_list('id', flat=True)
+    produk_list = Produk.objects.filter(kategori=kategori).exclude(id__in=produk_terbaru_ids)
+    
+    return render(request, 'toko/homepage_toko.html', {
+        'nama_kategori': kategori.nama,
+        'produk_list': produk_list,
+        'produk_terbaru': produk_terbaru,
+    })
+

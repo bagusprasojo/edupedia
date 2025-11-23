@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mptt',  # MPTT for tree structures
     'accounts',
     'produk',
     'toko',
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'toko.context_processors.cart_item_count',  # ✅ ini penting
+                'produk.context_processors.kategori_context',  # ✅ ini penting
             ],
         },
     },

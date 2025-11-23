@@ -1,24 +1,95 @@
 {% extends 'base.html' %}
 {% load static %}
 
+
 {% block content_top %}
 <div class="container mt-4">
+<style>
+.product-thumb {
+  position: relative;
+  width: 100%;
+  padding-top: 150%;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  background: #f8f9fa;
+}
+.product-thumb img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product-thumb a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+</style>
 
-<h3 id="produk" class="mt-5">🆕 Produk Terbaru</h3>
+<h3 id="produk_terbaru" class="mt-5">🆕 Produk Terbaru {{ nama_kategori }}</h3>
 <div class="row">
   {% for produk in produk_terbaru %}
-    <div class="col">
+    <div class="col-lg-3 col-md-3 col-sm-12 mb-4">
       <div class="card  rounded p-1">
-        {% if produk.gambar %}
-          <a href="{% url 'detail_produk' produk.uuid %}"><img src="{{ produk.gambar.url }}" class="card-img-top" style="height: 190px;  object-fit: cover;" alt="{{ produk.nama }}"></a>
-        {% else %}
-          <img src="{% static 'img/default-produk.jpg' %}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="No image">
-        {% endif %}
-        <div class="crad-body p-1">
+        <div class="product-thumb">
+          {% if produk.gambar %}
+            <a href="{% url 'detail_produk' produk.uuid %}">
+              <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}">
+            </a>
+          {% else %}
+            <img src="{% static 'img/default-produk.jpg' %}" alt="No image">
+          {% endif %}
+        </div>
+        <div class="card-body p-1">
           <small class="text-muted"><a href="{% url 'detail_produk' produk.uuid %}">{{ produk.nama|truncatechars:40 }}</a></small>
         </div>
 
-        <div class="crad-footer">
+        <div class="card-footer">
+          <div class="row">
+            <div class="col-7">            
+              <small class="text-muted">Rp{{ produk.harga|floatformat:0 }}</small>
+            </div>
+            <div class="col-5 text-right">
+              <small class="text-muted">
+                ⭐4.2
+              </small>            
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  {% empty %}
+    <p>Belum ada produk tersedia.</p>
+  {% endfor %}
+
+  
+</div>
+
+<h3 id="produk_all" class="mt-5">🆕 Produk</h3>
+<div class="row">
+  {% for produk in produk_list %}
+    <div class="col-lg-3 col-md-3 col-sm-12 mb-4">
+      <div class="card  rounded p-1">
+        <div class="product-thumb">
+          {% if produk.gambar %}
+            <a href="{% url 'detail_produk' produk.uuid %}">
+              <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}">
+            </a>
+          {% else %}
+            <img src="{% static 'img/default-produk.jpg' %}" alt="No image">
+          {% endif %}
+        </div>
+        <div class="card-body p-1">
+          <small class="text-muted"><a href="{% url 'detail_produk' produk.uuid %}">{{ produk.nama|truncatechars:40 }}</a></small>
+        </div>
+
+        <div class="card-footer">
           <div class="row">
             <div class="col-7">            
               <small class="text-muted">Rp{{ produk.harga|floatformat:0 }}</small>

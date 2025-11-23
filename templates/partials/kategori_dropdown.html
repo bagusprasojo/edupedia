@@ -1,0 +1,80 @@
+{% load mptt_tags %}
+
+<style>
+  /* Submenu styling */
+  .dropdown-submenu {
+    position: relative;
+  }
+  .dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+  }
+  .dropdown-menu.show {
+    display: block;
+  }
+</style>
+
+<ul class="navbar-nav w-100">
+  {% for level1 in kategori_root %}
+    <li class="nav-item dropdown">
+      {% if level1.is_leaf_node %}
+        <a class="nav-link" href="{% url 'produk_by_kategori' level1.uuid %}">{{ level1.nama }}</a>
+      {% else %}
+        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+          {{ level1.nama }}
+        </a>
+        <ul class="dropdown-menu">
+          {% for level2 in level1.get_children %}
+            <li class="{% if not level2.is_leaf_node %}dropdown-submenu{% endif %}">
+              {% if level2.is_leaf_node %}
+                <a class="dropdown-item" href="{% url 'produk_by_kategori' level2.uuid %}">{{ level2.nama }}</a>
+              {% else %}
+                <a href="#" class="dropdown-item dropdown-toggle">{{ level2.nama }}</a>
+                <ul class="dropdown-menu">
+                  {% for level3 in level2.get_children %}
+                    <li>
+                      <a class="dropdown-item" href="{% url 'produk_by_kategori' level3.uuid %}">{{ level3.nama }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+<script>
+  // Toggle untuk dropdown level 2 & 3
+  document.querySelectorAll('.dropdown-menu .dropdown-toggle').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      let nextMenu = el.nextElementSibling;
+      if (nextMenu && nextMenu.classList.contains('dropdown-menu')) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Tutup menu lain di level yang sama
+        let parentMenu = el.closest('.dropdown-menu');
+        if (parentMenu) {
+          parentMenu.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+            if (openMenu !== nextMenu) {
+              openMenu.classList.remove('show');
+            }
+          });
+        }
+
+        nextMenu.classList.toggle('show');
+      }
+    });
+  });
+
+  // Tutup semua dropdown kalau klik di luar
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+      menu.classList.remove('show');
+    });
+  });
+</script>

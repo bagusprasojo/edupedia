@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from mptt.models import MPTTModel, TreeForeignKey
 import uuid
 import os
 from mptt.models import MPTTModel, TreeForeignKey
@@ -19,19 +20,24 @@ def upload_to_uuid(instance, filename):
 #     class MPTTMeta:
 #         order_insertion_by = ['nama']
 
-class Kategori(models.Model):
+
+
+class Kategori(MPTTModel):
     nama = models.CharField(max_length=100)
-    uuid = models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
-    parent = models.ForeignKey(
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    parent = TreeForeignKey(
         'self',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='subkategori'
+        related_name='children'
     )
 
+    class MPTTMeta:
+        order_insertion_by = ['nama']
+
     def __str__(self):
-        return f"{self.parent.nama} > {self.nama}" if self.parent else self.nama
+        return self.nama
 
 
 class Produk(models.Model):
