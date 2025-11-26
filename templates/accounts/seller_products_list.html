@@ -2,6 +2,12 @@
 {% load static %}
 
 {% block content %}
+
+<style>
+  .btn-aktifkan {
+    min-width: 110px; /* atur sesuai kebutuhan */
+  }
+</style>
 <div class="container py-5">
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
@@ -14,17 +20,33 @@
     </div>
   </div>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-
   <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
+      {% if messages %}
+        <div class="px-4 pt-4">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm mb-3" role="alert" data-auto-dismiss>
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+        <script>
+          setTimeout(function() {
+            document.querySelectorAll('[data-auto-dismiss]').forEach(function(el) {
+              if (window.bootstrap && window.bootstrap.Alert && typeof window.bootstrap.Alert.getOrCreateInstance === 'function') {
+                var instance = window.bootstrap.Alert.getOrCreateInstance(el);
+                instance.close();
+              } else {
+                el.classList.remove('show');
+                setTimeout(function() {
+                  el.parentNode && el.parentNode.removeChild(el);
+                }, 200);
+              }
+            });
+          }, 3000);
+        </script>
+      {% endif %}
       <div class="table-responsive">
         <table class="table mb-0 align-middle">
           <thead class="table-light">
@@ -44,8 +66,7 @@
               <tr>
                 <td>{{ start_index|add:forloop.counter0 }}</td>
                 <td>
-                  <strong>{{ produk.nama }}</strong><br>
-                  <small class="text-muted">UUID: {{ produk.uuid }}</small>
+                  <strong>{{ produk.nama }}</strong>
                 </td>
                 <td>{{ produk.kategori.nama|default:"-" }}</td>
                 <td>Rp {{ produk.harga }}</td>
@@ -62,11 +83,11 @@
                   <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
                     <form method="post" action="{% url 'seller_product_toggle' produk.pk %}">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-sm btn-outline-warning">
+                      <button type="submit" class="btn btn-sm btn-outline-warning btn-aktifkan">
                         {% if produk.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
                       </button>
                     </form>
-                    <a href="{% url 'edit_produk' produk.uuid %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{% url 'edit_produk' produk.uuid %}" class="btn btn-sm btn-outline-primary mx-2">Edit</a>
                     <form method="post" action="{% url 'seller_product_delete' produk.pk %}" onsubmit="return confirm('Hapus {{ produk.nama }}?');">
                       {% csrf_token %}
                       <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>

@@ -146,7 +146,7 @@ def seller_product_toggle(request, pk):
     produk = get_object_or_404(Produk, pk=pk, penjual=request.user)
     activating = not produk.is_active
     if activating and produk.paket_soal.count() == 0:
-        messages.error(request, f"{produk.nama} belum memiliki paket soal, tambahkan terlebih dahulu sebelum mengaktifkan.")
+        messages.warning(request, f"{produk.nama} belum memiliki paket soal, tambahkan terlebih dahulu sebelum mengaktifkan.")
         return redirect('seller_products_list')
 
     produk.is_active = not produk.is_active
