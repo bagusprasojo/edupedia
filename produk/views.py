@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from .forms import ProdukForm
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_POST
+from .forms import ProdukForm, SoalForm
 from .models import Produk, PaketSoal, Soal, Kategori
 import openpyxl
 from django.db import transaction
@@ -47,6 +50,62 @@ def edit_produk(request, uuid):
         form = ProdukForm(instance=produk)
     return render(request, 'produk/tambah_produk.html', {'form': form, 'title': f'Edit: {produk.nama}'})
 
+
+@user_passes_test(seller_required)
+def paket_soal_detail(request, uuid):
+    print("Masuk ke paket_soal_detail dengan UUID:", uuid)
+    paket = get_object_or_404(PaketSoal, uuid=uuid)
+    print("Paket ditemukan:", paket.nama)
+
+    soal_qs = paket.soal.all().order_by('id')
+    total_soal = soal_qs.count()
+    paginator = Paginator(soal_qs, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    produk_terkait = paket.produks.filter(penjual=request.user).select_related('kategori')
+    print(f"Jumlah produk terkait: {produk_terkait.count()}")
+    return render(request, 'produk/detail_paket_soal.html', {
+        'paket': paket,
+        'page_obj': page_obj,
+        'soal_list': page_obj.object_list,
+        'produk_terkait': produk_terkait,
+        'total_soal': total_soal,
+        'start_index': page_obj.start_index() if page_obj.paginator.count else 0,
+    })
+
+
+@require_POST
+@user_passes_test(seller_required)
+def hapus_soal(request, uuid):
+    soal = get_object_or_404(
+        Soal.objects.select_related('paket__penjual'),
+        uuid=uuid,
+        paket__penjual=request.user
+    )
+    paket_uuid = soal.paket.uuid
+    soal.delete()
+    messages.success(request, "Soal berhasil dihapus.")
+    return redirect('paket_soal_detail', paket_uuid)
+
+
+@user_passes_test(seller_required)
+def edit_soal(request, uuid):
+    soal = get_object_or_404(
+        Soal.objects.select_related('paket__penjual'),
+        uuid=uuid,
+        paket__penjual=request.user
+    )
+    if request.method == 'POST':
+        form = SoalForm(request.POST, instance=soal)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Soal berhasil diperbarui.")
+            return redirect('paket_soal_detail', soal.paket.uuid)
+    else:
+        form = SoalForm(instance=soal)
+    return render(request, 'produk/edit_soal.html', {'form': form, 'paket': soal.paket, 'soal': soal})
+
 @user_passes_test(seller_required)
 @transaction.atomic
 def upload_paket_soal(request):
@@ -60,7 +119,7 @@ def upload_paket_soal(request):
             return render(request, 'produk/upload_excel.html', {'error': 'Lengkapi semua isian'})
 
         # Simpan paket soal dulu
-        paket = PaketSoal.objects.create(nama=nama_paket, deskripsi=deskripsi)
+        paket = PaketSoal.objects.create(nama=nama_paket, deskripsi=deskripsi, penjual=request.user)
 
         # Relasikan ke produk-produk
         for pid in produk_ids:

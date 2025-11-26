@@ -14,8 +14,9 @@
       <h2 class="mb-1">Daftar Produk Digital</h2>
       <p class="text-muted mb-0">Kelola seluruh modul, sesi live, dan paket tryout kamu dalam satu halaman.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-column flex-sm-row">
       <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">Kembali ke Dashboard</a>
+      <a href="{% url 'seller_paketsoal_list' %}" class="btn btn-outline-primary">Kelola Paket Soal</a>
       <a href="{% url 'buat_produk' %}" class="btn btn-primary">Tambah Produk</a>
     </div>
   </div>

@@ -1,0 +1,157 @@
+{% extends 'base_seller.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <p class="text-uppercase small text-muted mb-1">Detail Paket Soal</p>
+      <h2 class="mb-1">{{ paket.nama }}</h2>
+      <p class="text-muted mb-0">{{ paket.deskripsi|default:"Belum ada deskripsi" }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'seller_paketsoal_list' %}" class="btn btn-outline-secondary">Kembali ke daftar</a>
+      <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary">Kelola Soal</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Jumlah Soal</p>
+          <h4 class="mb-0">{{ total_soal|default:0 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Terhubung ke Produk</p>
+          <h4 class="mb-0">{{ produk_terkait|length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Status</p>
+          {% if total_soal %}
+            <span class="badge bg-success">Siap Digunakan</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Butuh Soal</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">Produk Terhubung</h5>
+      {% if produk_terkait %}
+        <ul class="list-group list-group-flush">
+          {% for produk in produk_terkait %}
+            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ produk.nama }}</strong><br>
+                <small class="text-muted">Kategori: {{ produk.kategori.nama|default:"-" }}</small>
+              </div>
+              <a href="{% url 'detail_produk' produk.uuid %}" class="btn btn-sm btn-outline-primary">Lihat Produk</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">Belum ada produk yang terhubung.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3">Daftar Soal</h5>
+      {% if total_soal %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Pertanyaan &amp; Opsi</th>
+                <th>Kunci Jawaban</th>
+                <th>Pembahasan</th>
+                <th class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for soal in page_obj.object_list %}
+                <tr>
+                  <td>{{ start_index|add:forloop.counter0 }}</td>
+                  <td>
+                    <div class="fw-semibold mb-2">{{ soal.teks|default:"(Pertanyaan kosong)" }}</div>
+                    <ul class="list-unstyled small text-muted mb-0">
+                      <li><strong>A.</strong> {{ soal.opsi_a|default:"-" }}</li>
+                      <li><strong>B.</strong> {{ soal.opsi_b|default:"-" }}</li>
+                      <li><strong>C.</strong> {{ soal.opsi_c|default:"-" }}</li>
+                      <li><strong>D.</strong> {{ soal.opsi_d|default:"-" }}</li>
+                    </ul>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary">{{ soal.jawaban_benar|default:"-" }}</span>
+                  </td>
+                  <td>{{ soal.pembahasan|default:"-"|truncatechars:120 }}</td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <a href="{% url 'edit_soal' soal.uuid %}" class="btn btn-outline-primary mx-2">Edit</a>
+                      <form method="post" action="{% url 'hapus_soal' soal.uuid %}" onsubmit="return confirm('Hapus soal ini?');" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Hapus</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+          <nav aria-label="Navigasi daftar soal">
+            <ul class="pagination pagination-sm justify-content-end mb-3">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                  <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                  <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+        <div class="text-end">
+          <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary">Tambah Soal</a>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Belum ada soal pada paket ini.</p>
+        <div class="text-end mt-3">
+          <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary">Tambah Soal</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

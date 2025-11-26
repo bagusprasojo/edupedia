@@ -10,12 +10,7 @@
         <p class="text-uppercase small mb-2">Studio Konten Digital</p>
         <h2 class="mb-1">Selamat datang kembali, {{ user.first_name|default:user.username }}!</h2>
         <p class="mb-0">Kurasi modul, soal, dan sesi live kamu dari satu tempat. Pantau kualitas dan royalti secara real time.</p>
-      </div>
-      <div class="text-md-end w-100" style="max-width:240px;">
-        <a href="{% url 'buat_produk' %}" class="btn btn-warning w-100 fw-semibold mb-2">Tambah Modul Baru</a>
-        <a href="{% url 'upload_paket_soal' %}" class="btn btn-outline-light w-100 mb-2">Upload Paket Soal</a>
-        <a href="{% url 'seller_products_list' %}" class="btn btn-outline-light w-100">Kelola Produk</a>
-      </div>
+      </div>      
     </div>
   </div>
 

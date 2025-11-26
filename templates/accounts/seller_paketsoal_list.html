@@ -1,0 +1,187 @@
+{% extends 'base_seller.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <p class="text-uppercase small text-muted mb-1">Bank Soal Digital</p>
+      <h2 class="mb-1">Daftar Paket Soal</h2>
+      <p class="text-muted mb-0">Monitor kualitas paket soal, jumlah soal aktif, dan keterhubungan dengan modul digitalmu.</p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+      <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary mx-2">Upload Paket Soal</a>
+      
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert" data-auto-dismiss>
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+    <script>
+      setTimeout(function() {
+        document.querySelectorAll('[data-auto-dismiss]').forEach(function(el) {
+          if (window.bootstrap && window.bootstrap.Alert && typeof window.bootstrap.Alert.getOrCreateInstance === 'function') {
+            var instance = window.bootstrap.Alert.getOrCreateInstance(el);
+            instance.close();
+          } else {
+            el.classList.remove('show');
+            setTimeout(function() {
+              el.parentNode && el.parentNode.removeChild(el);
+            }, 200);
+          }
+        });
+      }, 3000);
+    </script>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Total Paket</p>
+          <h4 class="mb-0">{{ stats.total_paket|default:0 }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Paket Siap</p>
+          <h4 class="mb-0 text-success">{{ stats.paket_siap|default:0 }}</h4>
+          <small class="text-muted">Memiliki soal aktif</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Belum Ada Soal</p>
+          <h4 class="mb-0 text-warning">{{ stats.paket_kosong|default:0 }}</h4>
+          <small class="text-muted">Butuh konten</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-1">Produk Terhubung</p>
+          <h4 class="mb-0">{{ stats.total_produk|default:0 }}</h4>
+          <small class="text-muted">{{ stats.total_soal|default:0 }} soal aktif</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-md-6">
+      <label class="form-label">Cari paket soal</label>
+      <input type="text" name="q" class="form-control" placeholder="Masukkan kata kunci" value="{{ search_query }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Status Konten</label>
+      <select name="status" class="form-select">
+        <option value="">Semua status</option>
+        <option value="ready" {% if status_filter == 'ready' %}selected{% endif %}>Siap digunakan</option>
+        <option value="empty" {% if status_filter == 'empty' %}selected{% endif %}>Belum ada soal</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-grid">
+      <button type="submit" class="btn btn-outline-primary">Terapkan Filter</button>
+    </div>
+  </form>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Paket Soal</th>
+              <th>Digunakan di Produk</th>
+              <th>Jumlah Soal</th>
+              <th>Status</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for paket in page_obj.object_list %}
+              <tr>
+                <td>{{ start_index|add:forloop.counter0 }}</td>
+                <td>
+                  <strong>{{ paket.nama }}</strong><br>
+                  <small class="text-muted">{{ paket.deskripsi|default:"Belum ada deskripsi"|truncatechars:80 }}</small>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark">{{ paket.total_produk|default:0 }} produk</span>
+                </td>
+                <td>{{ paket.total_soal|default:0 }}</td>
+                <td>
+                  {% if paket.total_soal|default:0 > 0 %}
+                    <span class="badge bg-success">Siap Digunakan</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Butuh Soal</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                    <a href="{% url 'paket_soal_detail' paket.uuid %}" class="btn btn-sm btn-outline-primary mx-2">Lihat Detail</a>
+                    <form method="post" action="{% url 'seller_paketsoal_delete' paket.uuid %}" onsubmit="return confirm('Hapus paket {{ paket.nama }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-5">
+                  Belum ada paket soal. Mulai dengan mengunggah paket soal pertamamu.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="card-footer bg-white">
+        <nav aria-label="Navigasi halaman paket soal">
+          <ul class="pagination mb-0 justify-content-end">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if search_query %}q={{ search_query }}&amp;{% endif %}{% if status_filter %}status={{ status_filter }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="?{% if search_query %}q={{ search_query }}&amp;{% endif %}{% if status_filter %}status={{ status_filter }}&amp;{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if search_query %}q={{ search_query }}&amp;{% endif %}{% if status_filter %}status={{ status_filter }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

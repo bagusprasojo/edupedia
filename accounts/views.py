@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from .forms import LoginForm
 from toko.models import Order
-from produk.models import Produk
-from django.db.models import Count
+from produk.models import Produk, PaketSoal
+from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
 from django.core.paginator import Paginator
@@ -163,6 +163,58 @@ def seller_product_delete(request, pk):
     produk.delete()
     messages.success(request, f"{produk.nama} berhasil dihapus.")
     return redirect('seller_products_list')
+
+
+@user_passes_test(seller_required)
+def seller_paketsoal_list(request):
+    base_qs = PaketSoal.objects.filter(produks__penjual=request.user).distinct()
+    summary_qs = base_qs.annotate(total_soal=Count('soal', distinct=True))
+    stats = {
+        'total_paket': summary_qs.count(),
+        'paket_siap': summary_qs.filter(total_soal__gt=0).count(),
+        'paket_kosong': summary_qs.filter(total_soal=0).count(),
+        'total_soal': summary_qs.aggregate(total=Count('soal', distinct=True))['total'] or 0,
+        'total_produk': summary_qs.aggregate(total=Count('produks', distinct=True))['total'] or 0,
+    }
+
+    paket_qs = base_qs
+    search_query = request.GET.get('q', '').strip()
+    if search_query:
+        paket_qs = paket_qs.filter(Q(nama__icontains=search_query) | Q(deskripsi__icontains=search_query))
+
+    paket_qs = paket_qs.annotate(
+        total_soal=Count('soal', distinct=True),
+        total_produk=Count('produks', distinct=True),
+    ).order_by('-id')
+
+    status_filter = request.GET.get('status')
+    if status_filter == 'ready':
+        paket_qs = paket_qs.filter(total_soal__gt=0)
+    elif status_filter == 'empty':
+        paket_qs = paket_qs.filter(total_soal=0)
+
+    paginator = Paginator(paket_qs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'start_index': page_obj.start_index() if page_obj.paginator.count else 0,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'stats': stats,
+    }
+    return render(request, 'accounts/seller_paketsoal_list.html', context)
+
+
+@require_POST
+@user_passes_test(seller_required)
+def seller_paketsoal_delete(request, uuid):
+    paket = get_object_or_404(PaketSoal, uuid = uuid, penjual=request.user)
+    nama = paket.nama
+    paket.delete()
+    messages.success(request, f"Paket soal '{nama}' berhasil dihapus.")
+    return redirect('seller_paketsoal_list')
 
 
 @user_passes_test(buyer_required)
