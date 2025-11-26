@@ -29,10 +29,23 @@ def tambah_produk(request):
             produk = form.save(commit=False)
             produk.penjual = request.user
             produk.save()
-            return redirect('seller_dashboard')  # atau redirect ke daftar produk
+            return redirect('seller_products_list')
     else:
         form = ProdukForm()
-    return render(request, 'produk/tambah_produk.html', {'form': form})
+    return render(request, 'produk/tambah_produk.html', {'form': form, 'title': 'Tambah Produk Baru'})
+
+
+@user_passes_test(seller_required)
+def edit_produk(request, uuid):
+    produk = get_object_or_404(Produk, uuid=uuid, penjual=request.user)
+    if request.method == 'POST':
+        form = ProdukForm(request.POST, request.FILES, instance=produk)
+        if form.is_valid():
+            form.save()
+            return redirect('seller_products_list')
+    else:
+        form = ProdukForm(instance=produk)
+    return render(request, 'produk/tambah_produk.html', {'form': form, 'title': f'Edit: {produk.nama}'})
 
 @user_passes_test(seller_required)
 @transaction.atomic

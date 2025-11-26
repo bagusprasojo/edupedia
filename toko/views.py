@@ -11,6 +11,15 @@ def tambah_ke_keranjang(request, uuid):
     return redirect('keranjang')
 
 @login_required
+def hapus_dari_keranjang(request, uuid):
+    """
+    Hapus item tertentu dari keranjang user aktif.
+    """
+    item = get_object_or_404(KeranjangItem, uuid=uuid, user=request.user)
+    item.delete()
+    return redirect('keranjang')
+
+@login_required
 def keranjang(request):
     item_keranjang = KeranjangItem.objects.filter(user=request.user)
     total = sum(item.produk.harga for item in item_keranjang)

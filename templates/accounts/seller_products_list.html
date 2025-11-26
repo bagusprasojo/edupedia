@@ -1,0 +1,123 @@
+{% extends 'base_seller.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h2 class="mb-1">Daftar Produk Digital</h2>
+      <p class="text-muted mb-0">Kelola seluruh modul, sesi live, dan paket tryout kamu dalam satu halaman.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">Kembali ke Dashboard</a>
+      <a href="{% url 'buat_produk' %}" class="btn btn-primary">Tambah Produk</a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Produk</th>
+              <th>Kategori</th>
+              <th>Harga</th>
+              <th>Jumlah Paket Soal</th>
+              <th>Status</th>
+              <th>Terakhir Diperbarui</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for produk in page_obj.object_list %}
+              <tr>
+                <td>{{ start_index|add:forloop.counter0 }}</td>
+                <td>
+                  <strong>{{ produk.nama }}</strong><br>
+                  <small class="text-muted">UUID: {{ produk.uuid }}</small>
+                </td>
+                <td>{{ produk.kategori.nama|default:"-" }}</td>
+                <td>Rp {{ produk.harga }}</td>
+                <td>{{ produk.paket_count|default:produk.paket_soal.count }}</td>
+                <td>
+                  {% if produk.is_active %}
+                    <span class="badge bg-success">Aktif</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Nonaktif</span>
+                  {% endif %}
+                </td>
+                <td>{{ produk.tanggal_diperbarui|date:"d M Y" }}</td>
+                <td class="text-center">
+                  <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                    <form method="post" action="{% url 'seller_product_toggle' produk.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-warning">
+                        {% if produk.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
+                      </button>
+                    </form>
+                    <a href="{% url 'edit_produk' produk.uuid %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form method="post" action="{% url 'seller_product_delete' produk.pk %}" onsubmit="return confirm('Hapus {{ produk.nama }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-5">
+                  Belum ada produk yang bisa ditampilkan. Tambahkan produk digital pertamamu sekarang.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="card-footer bg-white">
+        <nav aria-label="Navigasi halaman">
+          <ul class="pagination mb-0 justify-content-end">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">&laquo;</span>
+              </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">&raquo;</span>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

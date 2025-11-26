@@ -48,6 +48,7 @@ class Produk(models.Model):
     harga = models.DecimalField(max_digits=10, decimal_places=2)
     gambar = models.ImageField(upload_to=upload_to_uuid, null=True, blank=True)
     kategori = models.ForeignKey(Kategori, on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=False)
     paket_soal = models.ManyToManyField('PaketSoal', blank=True, related_name='produks')
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)
     tanggal_diperbarui = models.DateTimeField(auto_now=True)

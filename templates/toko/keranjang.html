@@ -1,29 +1,52 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load static %}
 {% block content_top %}
 <div class="container py-5">
-  <h3>🛒 Keranjang Belanja</h3>
+  <h3>Keranjang Belanja</h3>
   {% if item_keranjang %}
-    <table class="table mt-3">
-      <thead>
+    <table class="table table-borderless mt-3">
+      <thead class="bg-light">
         <tr>
           <th>Produk</th>
-          <th>Harga</th>
+          <th class="text-right">Harga</th>
         </tr>
       </thead>
       <tbody>
         {% for item in item_keranjang %}
         <tr>
-          <td>{{ item.produk.nama }}</td>
-          <td>Rp{{ item.produk.harga|floatformat:0 }}</td>
+          <td class="align-middle">
+            <div class="d-flex align-items-center">
+              <div class="mr-3" style="width: 70px; height: 70px;">
+                {% if item.produk.gambar %}
+                  <img src="{{ item.produk.gambar.url }}" alt="{{ item.produk.nama }}" class="img-fluid rounded" style="object-fit: cover; width: 70px; height: 70px;">
+                {% else %}
+                  <img src="{% static 'img/default-produk.jpg' %}" alt="default produk" class="img-fluid rounded" style="object-fit: cover; width: 70px; height: 70px;">
+                {% endif %}
+              </div>
+              <div>
+                <a href="{% url 'detail_produk' item.produk.uuid %}" class="font-weight-semibold text-dark">{{ item.produk.nama }}</a>
+              </div>
+            </div>
+          </td>
+          <td class="align-middle text-right">
+            <div class="d-flex justify-content-end align-items-center">
+              <span class="font-weight-bold mr-3">Rp{{ item.produk.harga|floatformat:0|intcomma }}</span>
+              <a href="{% url 'hapus_dari_keranjang' item.uuid %}" class="btn btn-outline-danger btn-sm">Hapus</a>
+            </div>
+          </td>
         </tr>
         {% endfor %}
-        <tr>
-          <td><strong>Total</strong></td>
-          <td><strong>Rp{{ total|floatformat:0 }}</strong></td>
+        <tr class="border-top">
+          <td class="font-weight-bold text-right pr-3">Total</td>
+          <td class="text-right font-weight-bold">Rp{{ total|floatformat:0|intcomma }}</td>
         </tr>
       </tbody>
     </table>
-    <a href="{% url 'checkout' %}" class="btn btn-success">Bayar Sekarang</a>
+    <div class="d-flex justify-content-end mt-4">
+      <a href="{% url 'checkout' %}" class="btn btn-success">Bayar Sekarang</a>
+      <a href="{% url 'homepage_toko' %}" class="btn btn-outline-secondary ml-2">Belanja Lagi</a>
+    </div>
   {% else %}
     <p>Keranjang kamu kosong.</p>
   {% endif %}

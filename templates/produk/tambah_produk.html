@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block content %}
-<h2>Tambah Produk Baru</h2>
+<div class="container py-5">
+  <h2 class="mb-4">{{ title|default:"Tambah Produk Baru" }}</h2>
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Simpan Produk</button>
+  <button type="submit" class="btn btn-primary">Simpan Produk</button>
+  <a href="{% url 'seller_products_list' %}" class="btn btn-outline-secondary">Batal</a>
 </form>
+</div>
 {% endblock %}
 
 
