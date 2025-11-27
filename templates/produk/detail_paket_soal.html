@@ -143,12 +143,12 @@
           </nav>
         {% endif %}
         <div class="text-end">
-          <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary">Tambah Soal</a>
+          <a href="{% url 'tambah_soal' paket.uuid %}" class="btn btn-primary">Tambah Soal</a>
         </div>
       {% else %}
         <p class="text-muted mb-0">Belum ada soal pada paket ini.</p>
         <div class="text-end mt-3">
-          <a href="{% url 'upload_paket_soal' %}" class="btn btn-primary">Tambah Soal</a>
+          <a href="{% url 'tambah_soal' paket.uuid %}" class="btn btn-primary">Tambah Soal</a>
         </div>
       {% endif %}
     </div>

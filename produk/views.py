@@ -106,6 +106,23 @@ def edit_soal(request, uuid):
         form = SoalForm(instance=soal)
     return render(request, 'produk/edit_soal.html', {'form': form, 'paket': soal.paket, 'soal': soal})
 
+
+@user_passes_test(seller_required)
+def tambah_soal(request, uuid):
+    paket = get_object_or_404(PaketSoal, uuid=uuid, penjual=request.user)
+    if request.method == 'POST':
+        form = SoalForm(request.POST)
+        if form.is_valid():
+            soal = form.save(commit=False)
+            soal.paket = paket
+            soal.save()
+            messages.success(request, "Soal baru berhasil ditambahkan.")
+            return redirect('paket_soal_detail', paket.uuid)
+    else:
+        form = SoalForm()
+
+    return render(request, 'produk/tambah_soal.html', {'form': form, 'paket': paket})
+
 @user_passes_test(seller_required)
 @transaction.atomic
 def upload_paket_soal(request):

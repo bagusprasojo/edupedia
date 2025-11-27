@@ -1,0 +1,41 @@
+{% extends 'base_seller.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <a href="{% url 'paket_soal_detail' paket.uuid %}" class="btn btn-link ps-0">&larr; Kembali ke Detail Paket</a>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h3 class="mb-3">Tambah Soal Baru</h3>
+      <p class="text-muted mb-4">{{ paket.nama }}</p>
+
+      <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{% url 'paket_soal_detail' paket.uuid %}" class="btn btn-outline-secondary">Batal</a>
+          <button type="submit" class="btn btn-primary">Simpan Soal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
