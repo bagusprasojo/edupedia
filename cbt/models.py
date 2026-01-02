@@ -16,7 +16,12 @@ class HasilUjian(models.Model):
 class JawabanUjian(models.Model):
     hasil = models.ForeignKey(HasilUjian, on_delete=models.CASCADE, related_name='jawaban')
     soal = models.ForeignKey(Soal, on_delete=models.CASCADE)
-    jawaban_dipilih = models.CharField(max_length=1, choices=[('A','A'), ('B','B'), ('C','C'), ('D','D')])
+    jawaban_dipilih = models.CharField(
+        max_length=1,
+        choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')],
+        blank=True,
+        null=True,
+    )
     benar = models.BooleanField()
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
